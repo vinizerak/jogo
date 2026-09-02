@@ -1,0 +1,9 @@
+{
+  "appId": "com.territorio.app",
+  "appName": "Território",
+  "webDir": "src",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true
+  }
+}
