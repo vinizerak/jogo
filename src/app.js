@@ -4,8 +4,8 @@
   var userPos = null;
   var CONQUER_RADIUS = 500;
 
-  var colors = { mine: '#5DCAA5', other: '#F0997B', disputed: '#EF9F27' };
-  var strokeColors = { mine: '#0F6E56', other: '#993C1D', disputed: '#854F0B' };
+  var colors = { mine: '#00E091', other: '#FF4D6A', disputed: '#FFC94A' };
+  var strokeColors = { mine: '#7EFFCB', other: '#FF8FA3', disputed: '#FFE0A0' };
 
   var territories = []; // cache local, carregado uma vez do Firestore
   var myPlayerId = null;
@@ -31,7 +31,7 @@
       color: strokeColors[cls],
       weight: 1.5,
       fillColor: colors[cls],
-      fillOpacity: cls === 'disputed' ? 0.4 : 0.5,
+      fillOpacity: cls === 'disputed' ? 0.55 : 0.7,
       dashArray: cls === 'disputed' ? '6,5' : null
     };
     var layer = L.polygon(ring, style).addTo(map);
@@ -100,7 +100,7 @@
       }
       var intersection = null;
       try {
-        intersection = turf.intersect(turf.featureCollection([existingShape, myApproxShape]));
+        intersection = turf.intersect(existingShape, myApproxShape);
       } catch (e) {
         intersection = null;
       }
