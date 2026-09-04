@@ -2,12 +2,12 @@
 // Console: https://console.firebase.google.com
 // Configurações do projeto > Seus apps > Configuração do SDK
 var firebaseConfig = {
-  apiKey: "COLOQUE_AQUI",
-  authDomain: "COLOQUE_AQUI.firebaseapp.com",
-  projectId: "COLOQUE_AQUI",
-  storageBucket: "COLOQUE_AQUI.appspot.com",
-  messagingSenderId: "COLOQUE_AQUI",
-  appId: "COLOQUE_AQUI"
+  apiKey: "AIzaSyDMMQ6NpZfYp4r_SvYnRbst4ZmpmUcW2ws",
+  authDomain: "territorio-app-a49f5.firebaseapp.com",
+  projectId: "territorio-app-a49f5",
+  storageBucket: "territorio-app-a49f5.firebasestorage.app",
+  messagingSenderId: "389641175053",
+  appId: "1:389641175053:web:04ef891f6ecdc620495544"
 };
 
 firebase.initializeApp(firebaseConfig);
