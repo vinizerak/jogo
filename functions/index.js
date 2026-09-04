@@ -57,7 +57,7 @@ exports.conquerTerritory = onCall(async (request) => {
 
     let existingShape;
     try {
-      existingShape = turf.polygon(t.polygon);
+      existingShape = turf.polygon(JSON.parse(t.polygon));
     } catch (e) {
       continue;
     }
@@ -80,7 +80,7 @@ exports.conquerTerritory = onCall(async (request) => {
     }
 
     if (remaining) {
-      batch.update(doc.ref, { polygon: remaining.geometry.coordinates });
+      batch.update(doc.ref, { polygon: JSON.stringify(remaining.geometry.coordinates) });
     } else {
       batch.delete(doc.ref);
     }
@@ -90,7 +90,7 @@ exports.conquerTerritory = onCall(async (request) => {
       ownerId: t.ownerId,
       status: 'disputed',
       disputedBy: playerId,
-      polygon: intersection.geometry.coordinates,
+      polygon: JSON.stringify(intersection.geometry.coordinates),
       disputeExpiresAt: now + DISPUTE_WINDOW_HOURS * 60 * 60 * 1000,
       lastCheckinAt: now
     });
@@ -102,7 +102,7 @@ exports.conquerTerritory = onCall(async (request) => {
     batch.set(newRef, {
       ownerId: playerId,
       status: 'owned',
-      polygon: myShape.geometry.coordinates,
+      polygon: JSON.stringify(myShape.geometry.coordinates),
       lastCheckinAt: now
     });
   } else {
@@ -110,7 +110,7 @@ exports.conquerTerritory = onCall(async (request) => {
     batch.set(newRef, {
       ownerId: playerId,
       status: 'owned',
-      polygon: myShape.geometry.coordinates,
+      polygon: JSON.stringify(myShape.geometry.coordinates),
       lastCheckinAt: now
     });
   }
