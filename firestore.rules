@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Qualquer jogador autenticado (mesmo anônimo) pode ler territórios,
+    // já que todo mundo precisa ver o mapa completo.
+    match /territories/{territoryId} {
+      allow read: if request.auth != null;
+
+      // Escrita só é permitida via Cloud Function (backend), nunca
+      // direto do app. Isso evita que alguém adultere o app e minta
+      // sobre a própria localização para roubar território.
+      allow write: if false;
+    }
+
+    match /players/{playerId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == playerId;
+      allow update: if request.auth != null && request.auth.uid == playerId;
+    }
+  }
+}
