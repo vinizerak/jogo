@@ -19,24 +19,42 @@ var functions = firebase.functions();
 window.Backend = {
 
   currentUserId: null,
+  currentUserName: null,
+  currentUserPhoto: null,
 
-  async ensureSignedIn() {
-    return new Promise((resolve, reject) => {
-      auth.onAuthStateChanged(async function (user) {
+  // Tenta manter a sessão existente (Google, se já logado antes).
+  // Se não houver ninguém logado, NÃO faz login anônimo automático:
+  // quem decide fazer login com Google é o próprio jogador, na tela
+  // inicial.
+  async getExistingSession() {
+    return new Promise((resolve) => {
+      auth.onAuthStateChanged(function (user) {
         if (user) {
           window.Backend.currentUserId = user.uid;
-          resolve(user.uid);
-          return;
-        }
-        try {
-          var result = await auth.signInAnonymously();
-          window.Backend.currentUserId = result.user.uid;
-          resolve(result.user.uid);
-        } catch (e) {
-          reject(e);
+          window.Backend.currentUserName = user.displayName || 'Jogador';
+          window.Backend.currentUserPhoto = user.photoURL || null;
+          resolve(user);
+        } else {
+          resolve(null);
         }
       });
     });
+  },
+
+  async signInWithGoogle() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    var result = await auth.signInWithPopup(provider);
+    window.Backend.currentUserId = result.user.uid;
+    window.Backend.currentUserName = result.user.displayName || 'Jogador';
+    window.Backend.currentUserPhoto = result.user.photoURL || null;
+    return result.user;
+  },
+
+  async signOut() {
+    await auth.signOut();
+    window.Backend.currentUserId = null;
+    window.Backend.currentUserName = null;
+    window.Backend.currentUserPhoto = null;
   },
 
   // Busca os territórios uma única vez (não fica escutando mudanças
@@ -59,6 +77,8 @@ window.Backend = {
         ownerId: data.ownerId,
         status: data.status,
         disputedBy: data.disputedBy || null,
+        name: data.name || 'Território sem nome',
+        disputeExpiresAt: data.disputeExpiresAt || null,
         polygon: polygon
       });
     });
@@ -67,9 +87,12 @@ window.Backend = {
 
   // Só é chamada quando o clique em "conquistar" já passou pela
   // checagem local mostrando que há algo a conquistar ali.
-  async conquerTerritory(lat, lng) {
+  // territoryName: obrigatório em conquista de área livre ou quando
+  // o jogador escolhe renomear. keepExistingName: true quando o
+  // jogador escolhe manter o nome do território que está roubando.
+  async conquerTerritory(lat, lng, territoryName, keepExistingName) {
     var call = functions.httpsCallable('conquerTerritory');
-    var result = await call({ lat: lat, lng: lng });
+    var result = await call({ lat: lat, lng: lng, territoryName: territoryName, keepExistingName: !!keepExistingName });
     return result.data;
   },
 
@@ -77,6 +100,18 @@ window.Backend = {
     var call = functions.httpsCallable('reinforceDispute');
     var result = await call({ territoryId: territoryId });
     return result.data;
+  },
+
+  async renameTerritory(territoryId, newName) {
+    var call = functions.httpsCallable('renameTerritory');
+    var result = await call({ territoryId: territoryId, newName: newName });
+    return result.data;
+  },
+
+  async getMyEvents() {
+    var call = functions.httpsCallable('getMyEvents');
+    var result = await call({});
+    return result.data.events || [];
   }
 
 };
