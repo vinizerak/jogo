@@ -62,7 +62,7 @@
     clearTimeout(showToast._t);
     showToast._t = setTimeout(function () {
       toast.classList.remove('show');
-    }, 3200);
+    }, 6000);
   }
 
   function estimateMyCircle(lat, lng) {
@@ -143,9 +143,12 @@
     myPlayerId = await window.Backend.ensureSignedIn();
 
     var pos;
+    var gpsError = null;
     try {
       pos = await window.NativeBridge.getCurrentPosition();
     } catch (e) {
+      console.error('Erro de geolocalização:', e);
+      gpsError = (e && e.message) ? e.message : 'Erro desconhecido';
       pos = { lat: -23.5558, lng: -46.6896 };
     }
 
@@ -177,6 +180,12 @@
     });
 
     document.getElementById('conquerBtn').addEventListener('click', handleConquer);
+
+    if (gpsError) {
+      setTimeout(function () {
+        showToast('ti-alert-triangle', '#993C1D', 'GPS não encontrado', gpsError + ' — usando São Paulo como padrão.');
+      }, 400);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init);
