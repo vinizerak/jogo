@@ -59,6 +59,7 @@ exports.conquerTerritory = onCall(async (request) => {
     try {
       existingShape = turf.polygon(JSON.parse(t.polygon));
     } catch (e) {
+      console.error('Falha ao ler polígono existente', doc.id, e.message);
       continue;
     }
 
@@ -66,9 +67,15 @@ exports.conquerTerritory = onCall(async (request) => {
     try {
       intersection = turf.intersect(turf.featureCollection([existingShape, myShape]));
     } catch (e) {
+      console.error('Falha ao calcular interseção', doc.id, e.message);
       continue;
     }
     if (!intersection) continue;
+
+    // Ignora interseções desprezíveis (encostar na borda, erro de
+    // arredondamento) para não gerar disputas de área quase zero.
+    const intersectionArea = turf.area(intersection);
+    if (intersectionArea < 5) continue;
 
     conqueredSomething = true;
 
@@ -76,6 +83,13 @@ exports.conquerTerritory = onCall(async (request) => {
     try {
       remaining = turf.difference(turf.featureCollection([existingShape, myShape]));
     } catch (e) {
+      console.error('Falha ao calcular diferença', doc.id, e.message);
+      remaining = null;
+    }
+
+    // Se o que sobrou do território antigo é desprezível, trata como
+    // se tivesse sido completamente engolido.
+    if (remaining && turf.area(remaining) < 5) {
       remaining = null;
     }
 
