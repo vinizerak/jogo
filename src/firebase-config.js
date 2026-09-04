@@ -47,12 +47,19 @@ window.Backend = {
     var territories = [];
     snap.forEach(function (doc) {
       var data = doc.data();
+      var polygon;
+      try {
+        polygon = typeof data.polygon === 'string' ? JSON.parse(data.polygon) : data.polygon;
+      } catch (e) {
+        polygon = null;
+      }
+      if (!polygon) return;
       territories.push({
         id: doc.id,
         ownerId: data.ownerId,
         status: data.status,
         disputedBy: data.disputedBy || null,
-        polygon: data.polygon
+        polygon: polygon
       });
     });
     return territories;
