@@ -133,7 +133,9 @@
         showToast('ti-check', '#0F6E56', 'Território conquistado', 'Área livre agora é sua.');
       }
     } catch (e) {
-      showToast('ti-alert-triangle', '#993C1D', 'Não deu pra conquistar', 'Tente novamente em instantes.');
+      console.error('Erro ao conquistar:', e);
+      var errMsg = (e && e.message) ? e.message : 'Erro desconhecido';
+      showToast('ti-alert-triangle', '#993C1D', 'Não deu pra conquistar', errMsg);
     }
   }
 
